@@ -3,6 +3,17 @@ from datetime import datetime
 from typing import List
 from fastapi import FastAPI
 from pydantic import BaseModel, constr, validator
+from pymongo import MongoClient
+from pymongo.collection import Collection
+
+# Database
+DB_URI = ""
+
+def get_collection() -> Collection:
+    client = MongoClient(DB_URI)
+    db = client.pessoas
+    collection = db.pessoas
+    return collection
 
 # Modelos
 class PessoaBase(BaseModel):
@@ -19,7 +30,7 @@ class PessoaBase(BaseModel):
         except ValueError:
             raise ValueError("Formato de data inválido")
 
-class PessoaRead(PessoaBase):
+class PessoaComID(PessoaBase):
     id: str | None
 
 # API e Rotas
@@ -27,9 +38,9 @@ app = FastAPI()
 
 @app.post("/pessoas")
 async def create_person(person: PessoaBase):
-    person = PessoaRead(id=str(uuid.uuid4()), **dict(person))
-    # ok = insere_pessoa
-    # if ok:
+    person = PessoaComID(id=str(uuid.uuid4()), **dict(person))
+    collection = get_collection()
+    collection.insert_one(person.model_dump())
     return person
 
 @app.get("/pessoas")
