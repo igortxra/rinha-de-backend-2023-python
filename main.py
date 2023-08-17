@@ -9,7 +9,7 @@ async def create_person():
 
 
 @app.get("/pessoas")
-async def get_persons(t: str):
+async def get_persons(t: str = None):
     return {"message": f"This action return all peoples"}
 
 
