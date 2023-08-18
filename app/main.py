@@ -7,11 +7,11 @@ from pymongo import MongoClient
 from pymongo.collection import Collection
 
 # Database
-DB_URI = ""
-
+DB_URI = "mongodb://root:root@db:27017/person_db?authSource=admin"
+ 
 def get_collection() -> Collection:
     client = MongoClient(DB_URI)
-    db = client.pessoas
+    db = client.person_db
     collection = db.pessoas
     return collection
 
