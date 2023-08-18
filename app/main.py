@@ -45,13 +45,22 @@ async def create_person(person: PessoaBase):
 
 @app.get("/pessoas")
 async def get_persons(t: str = None):
-    if t is None:
-        pass
-        # Pega Tudo
-    # Pega por filtro
-    
-    return {"message": f"This action return all peoples"}
 
+# Executando a consulta
+    if t is not None:
+        # Montando a consulta
+        consulta = {
+            "$or": [
+                {"apelido": {"$regex": t, "$options": "i"}},
+                {"nome": {"$regex": t, "$options": "i"}},
+                {"stack": t}
+            ]
+        }
+        collection = get_collection()
+        results = collection.find(consulta)
+        persons = [PessoaComID(**result) for result in results]
+    
+    return persons
 
 @app.get("/contagem-pessoas")
 async def get_count():
