@@ -1,10 +1,11 @@
 import uuid
 from datetime import datetime
 from typing import List
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, constr, validator
 from pymongo import MongoClient
 from pymongo.collection import Collection
+from bson.objectid import ObjectId
 
 # Database
 DB_URI = "mongodb://root:root@db:27017/person_db?authSource=admin"
@@ -36,33 +37,48 @@ class PessoaComID(PessoaBase):
 # API e Rotas
 app = FastAPI()
 
-@app.post("/pessoas")
+@app.post("/pessoas", status_code=201)
 async def create_person(person: PessoaBase):
-    person = PessoaComID(id=str(uuid.uuid4()), **dict(person))
+    # person = PessoaComID(id=str(uuid.uuid4()), **dict(person))
     collection = get_collection()
-    collection.insert_one(person.model_dump())
+    collection.insert_one(person.model_dump()).inserted_id
     return person
 
 @app.get("/pessoas")
-async def get_persons(t: str = None):
+async def get_persons(t: str = ''):
+    if not t:
+        raise HTTPException(status_code=400, detail="Parâmetro de busca inválido")
 
-# Executando a consulta
-    if t is not None:
-        # Montando a consulta
-        consulta = {
-            "$or": [
-                {"apelido": {"$regex": t, "$options": "i"}},
-                {"nome": {"$regex": t, "$options": "i"}},
-                {"stack": t}
-            ]
-        }
-        collection = get_collection()
-        results = collection.find(consulta)
-        persons = [PessoaComID(**result) for result in results]
-    
+    collection = get_collection()
+    # Executando a consulta
+    consulta = {
+        "$or": [
+            {"apelido": {"$regex": t, "$options": "i"}},
+            {"nome": {"$regex": t, "$options": "i"}},
+            {"stack": t}
+        ]
+    }
+    results = collection.find(consulta).limit(50)
+    # persons = [PessoaComID(**result) for result in results]
+
+    persons = []
+    for result in results:
+        result["id"] = str(result.pop("_id"))  # Convertendo ObjectId para string
+        persons.append(result)
     return persons
+
+@app.get("/pessoas/{id}")
+async def get_person_by_id(id:str):
+    collection = get_collection()
+    print(id)
+    result = collection.find_one({"_id": ObjectId(id)})
+    if result is None:
+        raise HTTPException(status_code=404, detail="Pessoa não encontrada")
+    result["id"] = str(result.pop("_id"))  # Convertendo ObjectId para string
+    # return PessoaComID(**result) 
+    return result 
 
 @app.get("/contagem-pessoas")
 async def get_count():
-    return {"message": "This action return count of peoples"}
+    return get_collection().count_documents({})
 
