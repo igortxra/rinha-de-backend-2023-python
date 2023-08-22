@@ -11,8 +11,8 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "0.25"
-          memory: "750MB"
+          cpus: "0.35"
+          memory: "700MB"
 
   api02:
     build: ./
@@ -24,8 +24,8 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "0.25"
-          memory: "750MB"
+          cpus: "0.35"
+          memory: "700MB"
 
   nginx:
     # Load Balancer
@@ -40,8 +40,8 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "0.25"
-          memory: "500MB"
+          cpus: "0.05"
+          memory: "800MB"
 
   db:
     image: mongo:latest
@@ -51,22 +51,24 @@ services:
       - MONGO_INITDB_ROOT_USERNAME=root
       - MONGO_INITDB_ROOT_PASSWORD=root
     command: mongod --quiet --logpath /dev/null
-    volumes:
-      - ./dbdata:/data/db
     ports:
       - "27017:27017"
     deploy:
       resources:
         limits:
-          cpus: "0.55"
-          memory: "1072MB"
-    healthcheck:
-      test: echo 'db.runCommand("ping").ok' | mongo mongo:27017/test --quiet
-      interval: 10s
-      timeout: 10s
-      retries: 5
-      start_period: 40s
+          cpus: "0.73"
+          memory: "750MB"
 
+  redis:
+    image: redis:latest
+    hostname: redis
+    ports:
+      - "6379:6379"
+    deploy:
+      resources:
+        limits:
+          cpus: "0.02"
+          memory: "50MB"
 networks:
   default:
     driver: bridge
