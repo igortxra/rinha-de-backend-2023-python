@@ -12,7 +12,7 @@ services:
       resources:
         limits:
           cpus: "0.35"
-          memory: "700MB"
+          memory: "0.75GB"
 
   api02:
     build: ./
@@ -25,7 +25,7 @@ services:
       resources:
         limits:
           cpus: "0.35"
-          memory: "700MB"
+          memory: "0.75GB"
 
   nginx:
     # Load Balancer
@@ -41,7 +41,7 @@ services:
       resources:
         limits:
           cpus: "0.05"
-          memory: "800MB"
+          memory: "0.25GB"
 
   db:
     image: mongo:latest
@@ -56,19 +56,20 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "0.73"
-          memory: "750MB"
+          cpus: "0.75"
+          memory: "1.25GB"
 
-  redis:
-    image: redis:latest
-    hostname: redis
-    ports:
-      - "6379:6379"
-    deploy:
-      resources:
-        limits:
-          cpus: "0.02"
-          memory: "50MB"
+  # redis:
+  #   image: redis:latest
+  #   hostname: redis
+  #   ports:
+  #     - "6379:6379"
+  #   deploy:
+  #     resources:
+  #       limits:
+  #         cpus: "0.02"
+  #         memory: "50MB"
+
 networks:
   default:
     driver: bridge

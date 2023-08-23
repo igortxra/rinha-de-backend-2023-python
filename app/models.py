@@ -1,18 +1,9 @@
-from pydantic import BaseModel, constr, validator
-from datetime import datetime
+from pydantic import BaseModel, constr
 from typing import List
 
 # Modelos
-class PessoaBase(BaseModel):
+class Pessoa(BaseModel):
     apelido: constr(max_length=32)
     nome: constr(max_length=100)
-    nascimento: str
+    nascimento: constr(pattern=r'^\d{4}-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])$')
     stack: List[constr(max_length=32)] | None
-
-    @validator("nascimento")
-    def valida_formato_data(cls, valor):
-        try:
-            datetime.strptime(valor, '%Y-%m-%d')
-            return valor
-        except ValueError:
-            raise ValueError("Formato de data inválido")
